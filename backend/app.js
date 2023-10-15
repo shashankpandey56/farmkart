@@ -4,7 +4,7 @@ const dotenv = require('dotenv')
 const erorrMiddleware = require('./middleware/error')
 const cookieParser = require('cookie-parser')
 const s3Operations = require('./s3');
-dotenv.config({ path: "backend/config/config.env" })
+dotenv.config({ path: "backend/config/.env" })
 
 
 
