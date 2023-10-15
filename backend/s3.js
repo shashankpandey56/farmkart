@@ -30,7 +30,7 @@ const bucketParams = {
 
   const downloadParams = {
     Bucket: 'shashank-056',
-    Key: 'exampledownloads', // The name of the object in the bucket
+    Key: 'example', // The name of the object in the bucket
   };
   
   s3.getObject(downloadParams, (err, data) => {
