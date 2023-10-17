@@ -1,4 +1,6 @@
-import * as React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AuthService from '../services/auth.service';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -11,7 +13,6 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login, logout } from '../shared/authSlice';
 
@@ -37,27 +38,45 @@ export default function SignIn() {
     setPasswordError(password.length < 8);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const user = { email, password };
-    await axios
-      .post('http://localhost:4000/api/v1/login', user)
-      .then((res) => {
-        // console.log(res);
-        console.log(res.data);
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   const user = { email, password };
+  //   await axios
+  //     .post('http://localhost:4000/api/v1/login', user)
+  //     .then((res) => {
+  //       // console.log(res);
+  //       console.log(res.data);
 
-        if (res.status == '200') {
+  //       if (res.status === '200') {
+  //         navigate('/');
+  //         dispatch(login(true));
+  //         dispatch(logout(false));
+  //       }
+  //       setUser(res.data);
+  //       sessionStorage.setItem('user', JSON.stringify(res.data));
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  //   // console.log(allowed);
+  // };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await AuthService.login(email, password).then(
+        () => {
           navigate('/');
-          dispatch(login(true));
-          dispatch(logout(false));
+          console.log(email, password);
+          // window.location.reload();
+        },
+        (error) => {
+          console.log(error);
         }
-        setUser(res.data);
-        sessionStorage.setItem('user', JSON.stringify(res.data));
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    // console.log(allowed);
+      );
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -80,7 +99,7 @@ export default function SignIn() {
           </Typography>
           <Box
             component="form"
-            onSubmit={handleSubmit}
+            onSubmit={handleLogin}
             noValidate
             sx={{ mt: 1 }}
           >
