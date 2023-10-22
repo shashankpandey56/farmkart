@@ -1,4 +1,6 @@
-import * as React from 'react';
+import React, { useState } from 'react';
+import AuthService from '../services/auth.service';
+import { useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,16 +14,12 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from 'axios';
 
-import { useNavigate } from 'react-router-dom';
-
 const defaultTheme = createTheme();
 
 export default function SignUp() {
-  const [inputData, setInputData] = React.useState({
-    name: '',
-    email: '',
-    password: '',
-  });
+  const [name, setName] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
   const [nameError, setNameError] = React.useState(false);
   const [emailError, setEmailError] = React.useState(false);
   const [passwordError, setPasswordError] = React.useState(false);
@@ -29,37 +27,54 @@ export default function SignUp() {
   const navigate = useNavigate();
 
   const handleName = (e) => {
-    setInputData({ ...inputData, [e.target.name]: e.target.value });
-    setNameError(inputData.name.length < 1 || inputData.name.length > 30);
+    setName(e.target.value);
+    setNameError(name.length < 1 || name.length > 30);
   };
 
   const handleEmail = (e) => {
-    setInputData({ ...inputData, [e.target.name]: e.target.value });
-    setEmailError(
-      !(inputData.email.includes('.') && inputData.email.includes('@'))
-    );
+    setEmail(e.target.value);
+    setEmailError(!(email.includes('.') && email.includes('@')));
   };
 
   const handlePassword = (e) => {
-    setInputData({ ...inputData, [e.target.name]: e.target.value });
-    setPasswordError(inputData.password.length < 8);
+    setPassword(e.target.value);
+    setPasswordError(password.length < 8);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    await axios
-      .post('http://localhost:4000/api/v1/register', inputData)
-      .then((res) => {
-        // console.log(res);
-        // console.log(res.status);
-        if (res.status == '201') {
-          navigate('/signin');
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   await axios
+  //     .post('http://localhost:4000/api/v1/register', inputData)
+  //     .then((res) => {
+  //       // console.log(res);
+  //       // console.log(res.status);
+  //       if (res.status == '201') {
+  //         navigate('/signin');
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  //   // console.log(allowed);
+  // };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    try {
+      await AuthService.signup(email, password).then(
+        (response) => {
+          // check for token and user already exists with 200
+          //   console.log("Sign up successfully", response);
+          navigate('/');
+          window.location.reload();
+        },
+        (error) => {
+          console.log(error);
         }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    // console.log(allowed);
+      );
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -83,7 +98,7 @@ export default function SignUp() {
           <Box
             component="form"
             noValidate
-            onSubmit={handleSubmit}
+            onSubmit={handleSignup}
             sx={{ mt: 3 }}
           >
             <Grid container spacing={2}>
@@ -91,7 +106,7 @@ export default function SignUp() {
                 <TextField
                   autoComplete="given-name"
                   name="name"
-                  value={inputData.name}
+                  value={name}
                   required
                   fullWidth
                   id="name"
@@ -110,7 +125,7 @@ export default function SignUp() {
                 <TextField
                   required
                   fullWidth
-                  value={inputData.email}
+                  value={email}
                   id="email"
                   label="Email Address"
                   name="email"
@@ -124,7 +139,7 @@ export default function SignUp() {
                 <TextField
                   required
                   fullWidth
-                  value={inputData.password}
+                  value={password}
                   name="password"
                   label="Password"
                   type="password"

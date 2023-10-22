@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -13,36 +13,30 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import profile from '../assets/prof.png';
 import { Link } from 'react-router-dom';
 import Tooltip from '@mui/material/Tooltip';
-import logo from '../assets/logo.png';
+import { logo } from '../constants';
 import { useSelector } from 'react-redux';
 import { Button, Typography } from '@mui/material';
-
-import axios from 'axios';
-import useLogin from '../shared/useLogin';
+import AuthService from '../services/auth.service';
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const cartItems = useSelector((store) => store.cart.items);
-  const logged = useLogin();
 
-  const user = JSON.parse(sessionStorage.getItem('user'));
-  // console.log(user);
+  // user
+  const [currentUser, setCurrentUser] = useState(undefined);
 
-  const handleLogOut = async () => {
-    axios
-      .get('http://localhost:4000/api/v1/logout')
-      .then((res) => {
-        console.log(res);
-        if (logged) {
-          JSON.parse(sessionStorage.removeItem('user'));
-        } else {
-          console.log('user not yet loggedin');
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+  useEffect(() => {
+    const user = AuthService.getCurrentUser();
+    console.log(localStorage.getItem('user'));
+
+    if (user) {
+      setCurrentUser(user);
+    }
+  }, []);
+
+  const logOut = () => {
+    AuthService.logout();
   };
 
   const handleOpenNavMenu = (event) => {
@@ -210,6 +204,54 @@ function ResponsiveAppBar() {
             </List>
           </Box>
 
+          {currentUser ? (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '1rem',
+              }}
+            >
+              <ListItem>
+                <Link
+                  to="/signin"
+                  onClick={logOut}
+                  style={{ textDecoration: 'none', color: '#000' }}
+                >
+                  Logout
+                </Link>
+              </ListItem>
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '1rem',
+              }}
+            >
+              <ListItem>
+                <Link
+                  to={'/signin'}
+                  style={{ textDecoration: 'none', color: '#000' }}
+                >
+                  Login
+                </Link>
+              </ListItem>
+
+              <ListItem>
+                <Link
+                  to={'/signup'}
+                  style={{ textDecoration: 'none', color: '#000' }}
+                >
+                  Signup
+                </Link>
+              </ListItem>
+            </Box>
+          )}
+
           <Box
             sx={{
               display: 'flex',
@@ -228,28 +270,6 @@ function ResponsiveAppBar() {
                     gap: '1rem',
                   }}
                 >
-                  {/* {logged && user.user.role === 'admin' ? (
-                    <Typography component="span" color="black">
-                      <Link
-                        style={{ textDecoration: 'none', color: '#000' }}
-                        to="/admin"
-                      >
-                        Add Item
-                      </Link>
-                    </Typography>
-                  ) : null} */}
-                  {/* <Typography component="span" color="black">
-                    {!logged ? (
-                      <Link
-                        style={{ textDecoration: 'none', color: '#000' }}
-                        to="/signin"
-                      >
-                        Sign In
-                      </Link>
-                    ) : (
-                      user.user.name || 'Sign In'
-                    )}
-                  </Typography> */}
                   <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                     <Avatar alt="Avtar" src={profile} />
                   </IconButton>
@@ -289,7 +309,7 @@ function ResponsiveAppBar() {
                     </Button>
                   </ListItem>
                   <ListItem>
-                    <Button onClick={handleLogOut}>
+                    <Button>
                       <Link
                         to="/signin"
                         style={{
