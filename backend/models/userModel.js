@@ -75,7 +75,7 @@ return new Promise ((resolve,reject) => {
 
 });
 };
-mongoose.model('User', userSchema);
+// mongoose.model('User', userSchema);
 userSchema.methods.getResetPasswordToken = function () {
     // Generating Token
     const resetToken = crypto.randomBytes(20).toString("hex");

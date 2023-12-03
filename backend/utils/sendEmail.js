@@ -10,6 +10,7 @@ const sendEmail = async (options) => {
             user: process.env.SMTP_MAIL,
             pass: process.env.SMTP_PASSWORD,
         },
+        debug:true
     });
 
     const mailOptions = {
@@ -18,8 +19,9 @@ const sendEmail = async (options) => {
         subject: options.subject,
         text: options.message,
     };
-
-    await transporter.sendMail(mailOptions);
+    console.log('mail options ===',mailOptions)
+    const iii = await transporter.sendMail(mailOptions);
+    console.log('result after ===',iii)
 };
 
 module.exports = sendEmail;

@@ -10,6 +10,7 @@ const crypto = require("crypto");
 
 exports.registerUser = catchAsyncError(async (req, res, next) => {
     const { name, email, password } = req.body
+    console.log('----------------ss',req.body)
     const user = await User.create({
         name, email, password,
         avatar: {
@@ -80,6 +81,7 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
             message: `Email sent to ${user.email} successfully`,
         });
     } catch (error) {
+        console.log('eeeerr=',error.message)
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
 

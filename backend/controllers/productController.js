@@ -2,18 +2,66 @@ const Product = require('../models/productModel')
 const ErrorHandler = require('../utils/errorHandler')
 const catchAsyncError = require('../middleware/catchAsyncError')
 const ApiFeatures = require('../utils/apiFeatures')
+const fs = require('fs');
+const { promisify } = require('util');
 
+const AWS = require('aws-sdk');
+
+AWS.config.update({
+  accessKeyId:process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey:process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.REGION,
+});
+const s3 = new AWS.S3();
+
+
+
+const uploadedToAws = async (images) => {
+    const response = {};
+    try {
+        const currentDate = Date.now();
+        const imageBuffer = fs.readFileSync(images.url);
+        const awsKey = images.public_id + String(currentDate);
+        
+        const uploadParams = {
+            Bucket: process.env.BUCKET,
+            Key: awsKey,
+            Body: imageBuffer,
+            ACL: 'public-read'
+        };
+
+        const putObject = promisify(s3.putObject).bind(s3);
+        const data = await putObject(uploadParams);
+        response['status'] = 200;
+        response['message'] = "Uploaded successfully";
+        response['imageName'] = awsKey
+        response['data'] = data;
+        return response;
+    } catch (error) {
+        console.error('Error uploading object:', error);
+        response['status'] = 500;
+        response['message'] = "Upload failed";
+        return response;
+    }
+};
 
 //Create product 
 exports.createProduct = catchAsyncError(async (req, res) => {
-    console.log('running this route')
     req.body.user = req.user.id
-    const product = await Product.create(req.body)
-    res.status(201).json({
-        success: true,
-        product
+    const data = req.body
+    const images = data.images
+    const awsData = await uploadedToAws(images)
+    if(awsData.status === 200){
+        data.images = {"public_id": awsData.imageName,"url":images.url}
+        const product = await Product.create(data)
+        res.status(201).json({
+            success: true,
+            product
 
-    })
+        })
+
+    }
+    
 })
 
 

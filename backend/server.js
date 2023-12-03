@@ -2,6 +2,7 @@ const app = require('./app')
 const dotenv = require('dotenv')
 const connectDatabase = require('./config/database')
 const s3Operations = require('./s3');
+// const cors = require('cors');
 
 //handling uncaught exception 
 process.on('uncaughtException', (err) => {
@@ -12,9 +13,15 @@ process.on('uncaughtException', (err) => {
     })
 })
 
-dotenv.config({ path: "backend/config/.env" })
+dotenv.config({ path: "backend/config/config.env" })
 
 //database connection
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+  });
 
 connectDatabase()
 const server = app.listen(process.env.PORT, () => {
